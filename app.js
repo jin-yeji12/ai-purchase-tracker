@@ -145,10 +145,43 @@ app.post('/slack/commands', async (req, res) => {
     return;
   }
   
-  res.status(200).send({
-    text: `입력받은 내용: ${text}`,
-    response_type: 'ephemeral'
-  });
+  // 간단한 파싱
+  const parts = text.split(' ');
+  if (parts.length < 2) {
+    res.status(200).send({
+      text: '형식이 올바르지 않습니다. 예시: /ai구매 ChatGPT Plus 20$',
+      response_type: 'ephemeral'
+    });
+    return;
+  }
+  
+  const amount = parts[parts.length - 1].replace(/[^0-9.]/g, '');
+  const programName = parts.slice(0, -1).join(' ');
+  const currentDate = new Date().toLocaleDateString('ko-KR');
+  
+  try {
+    // 구글 시트에 데이터 추가 시도
+    const values = [[currentDate, '테스트사용자', programName, amount, '']];
+    
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: GOOGLE_SHEETS_ID,
+      range: 'Sheet1!A:E',
+      valueInputOption: 'USER_ENTERED',
+      resource: { values },
+    });
+    
+    res.status(200).send({
+      text: `구매 내역 등록 완료!\n프로그램: ${programName}\n금액: ${amount}`,
+      response_type: 'ephemeral'
+    });
+    
+  } catch (error) {
+    console.error('Google Sheets error:', error);
+    res.status(200).send({
+      text: `파싱 성공했지만 구글 시트 연동 실패\n프로그램: ${programName}\n금액: ${amount}`,
+      response_type: 'ephemeral'
+    });
+  }
 });
 
 
@@ -165,5 +198,6 @@ app.listen(port, () => {
 
 
 module.exports = app;
+
 
 
