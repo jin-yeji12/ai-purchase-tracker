@@ -133,120 +133,15 @@ function parseInput(text) {
 
 // 슬랙 슬래시 커맨드 핸들러
 app.post('/slack/commands', async (req, res) => {
-  const { command, text, user_id, user_name, channel_id } = req.body;
-
-  // 즉시 응답 (3초 내에 응답해야 함)
+console.log('Slack request received');
+  
   res.status(200).send({
-    text: '처리 중입니다... 잠시만 기다려주세요.',
+    text: '테스트 성공! 앱이 작동합니다.',
     response_type: 'ephemeral'
   });
-
-  try {
-    if (command === '/ai구매') {
-      if (!text || text.trim() === '') {
-        await slack.chat.postMessage({
-          channel: channel_id,
-          text: `사용법: \`${command} [프로그램명] [금액]\`\n예시: \`${command} ChatGPT Plus 20000\``
-        });
-        return;
-      }
-
-      const parsed = parseInput(text);
-      if (!parsed) {
-        await slack.chat.postMessage({
-          channel: channel_id,
-          text: '입력 형식이 올바르지 않습니다.\n사용법: `' + command + ' [프로그램명] [금액]`\n예시: `' + command + ' ChatGPT Plus 20000`'
-        });
-        return;
-      }
-
-      // 사용자 정보 가져오기
-      const userName = await getSlackUserInfo(user_id);
-      
-      // 현재 날짜
-      const currentDate = new Date().toLocaleDateString('ko-KR');
-
-      // 스프레드시트에 추가
-      const success = await addToSpreadsheet(
-        userName,
-        parsed.programName,
-        parsed.amount,
-        currentDate
-      );
-
-      if (success) {
-        await slack.chat.postMessage({
-          channel: channel_id,
-          text: `✅ AI 프로그램 구매 내역이 등록되었습니다!\n\n` +
-                `• 구입자: ${userName}\n` +
-                `• 프로그램: ${parsed.programName}\n` +
-                `• 금액: ${parsed.amount.toLocaleString()}원\n` +
-                `• 날짜: ${currentDate}`,
-          blocks: [
-            {
-              type: 'section',
-              text: {
-                type: 'mrkdwn',
-                text: `✅ *AI 프로그램 구매 내역이 등록되었습니다!*`
-              }
-            },
-            {
-              type: 'section',
-              fields: [
-                {
-                  type: 'mrkdwn',
-                  text: `*구입자:*\n${userName}`
-                },
-                {
-                  type: 'mrkdwn',
-                  text: `*프로그램:*\n${parsed.programName}`
-                },
-                {
-                  type: 'mrkdwn',
-                  text: `*금액:*\n${parsed.amount.toLocaleString()}원`
-                },
-                {
-                  type: 'mrkdwn',
-                  text: `*날짜:*\n${currentDate}`
-                }
-              ]
-            },
-            {
-              type: 'actions',
-              elements: [
-                {
-                  type: 'button',
-                  text: {
-                    type: 'plain_text',
-                    text: '스프레드시트 보기'
-                  },
-                  url: `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEETS_ID}`
-                }
-              ]
-            }
-          ]
-        });
-      } else {
-        await slack.chat.postMessage({
-          channel: channel_id,
-          text: '❌ 스프레드시트 업데이트 중 오류가 발생했습니다. 관리자에게 문의해주세요.'
-        });
-      }
-    }
-  } catch (error) {
-    console.error('Error processing command:', error);
-    await slack.chat.postMessage({
-      channel: channel_id,
-      text: '❌ 처리 중 오류가 발생했습니다. 다시 시도해주세요.'
-    });
-  }
 });
 
-// 월별 통계 조회 기능
-app.post('/slack/interactions', express.json(), async (req, res) => {
-  // 버튼 클릭이나 기타 인터랙션 처리
-  res.status(200).send();
-});
+
 
 // 헬스 체크
 app.get('/', (req, res) => {
@@ -261,3 +156,4 @@ app.listen(port, () => {
 
 
 module.exports = app;
+
