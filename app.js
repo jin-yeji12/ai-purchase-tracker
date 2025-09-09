@@ -133,14 +133,23 @@ function parseInput(text) {
 
 // 슬랙 슬래시 커맨드 핸들러
 app.post('/slack/commands', async (req, res) => {
-console.log('Slack request received');
+  console.log('Slack request received');
+  
+  const { text } = req.body;
+  
+  if (!text || text.trim() === '') {
+    res.status(200).send({
+      text: '사용법: /ai구매 [프로그램명] [금액]\n예시: /ai구매 ChatGPT Plus 20$',
+      response_type: 'ephemeral'
+    });
+    return;
+  }
   
   res.status(200).send({
-    text: '테스트 성공! 앱이 작동합니다.',
+    text: `입력받은 내용: ${text}`,
     response_type: 'ephemeral'
   });
 });
-
 
 
 // 헬스 체크
@@ -156,4 +165,5 @@ app.listen(port, () => {
 
 
 module.exports = app;
+
 
