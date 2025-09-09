@@ -132,7 +132,7 @@ function parseInput(text) {
 }
 
 // 슬랙 슬래시 커맨드 핸들러
-app.post('/slack/commands', verifySlackRequest, async (req, res) => {
+app.post('/slack/commands', async (req, res) => {
   const { command, text, user_id, user_name, channel_id } = req.body;
 
   // 즉시 응답 (3초 내에 응답해야 함)
@@ -258,5 +258,6 @@ app.listen(port, () => {
   console.log(`Server running on port ${port}`);
   console.log('AI Purchase Tracker Slack App is ready!');
 });
+
 
 module.exports = app;
